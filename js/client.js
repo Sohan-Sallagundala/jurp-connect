@@ -1,0 +1,75 @@
+const socket = io('http://localhost:8000');
+
+const form = document.getElementById('send-container');
+const messageInput = document.getElementById('messageInp');
+const messageContainer = document.querySelector('.container');
+const fileInp = document.getElementById('fileInp');
+const audio = new Audio('ting.mp3');
+
+function login() {
+    const group = document.getElementById('groupName').value;
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    
+    if(group && user && pass) {
+        socket.emit('join-room', { groupName: group, userName: user, password: pass });
+    } else {
+        alert("Please fill all fields");
+    }
+}
+
+socket.on('login-success', (userName) => {
+    document.getElementById('login-screen').style.display = 'none';
+    document.querySelector('nav h1').innerText = "Active Channel: " + document.getElementById('groupName').value;
+});
+
+socket.on('login-error', (msg) => {
+    alert(msg);
+});
+
+const append = (message, position) => {
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = message;
+    messageElement.classList.add('message', position);
+    messageContainer.append(messageElement);
+    if (position == 'left') {
+        audio.play().catch(e => console.log("Audio play blocked"));
+    }
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+}
+
+form.addEventListener('submit', (e) => {
+    e.preventDefault(); 
+    const message = messageInput.value;
+    if(message.trim() !== "") {
+        append(`You: ${message}`, 'right');
+        socket.emit('send', message);
+        messageInput.value = '';
+    }
+});
+
+fileInp.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+        const fileData = { name: file.name, type: file.type, body: reader.result };
+        append(`You sent: ${file.name}`, 'right');
+        socket.emit('send-file', fileData);
+    };
+    reader.readAsDataURL(file);
+});
+
+socket.on('receive', data => {
+    append(`<b>${data.name}:</b> ${data.message}`, 'left');
+});
+
+socket.on('receive-file', data => {
+    let content = '';
+    if (data.type.includes('image')) {
+        content = `<img src="${data.body}" style="max-width:250px; display:block; margin-bottom:5px;">`;
+    }
+    const link = `<a href="${data.body}" download="${data.name}">Download ${data.name}</a>`;
+    append(`<b>${data.userName}:</b><br>${content}${link}`, 'left');
+});
