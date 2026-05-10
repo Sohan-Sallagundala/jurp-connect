@@ -1,8 +1,6 @@
-const PORT = process.env.PORT || 8000; 
-const io = require('socket.io')(PORT, {
+const io = require('socket.io')(process.env.PORT || 8000, {
     cors: {
-        origin: "https://sohan-sallagundala.github.io/bat-connect/",
-        methods: ["GET", "POST"]
+        origin: "https://sohan-sallagundala.github.io/bat-connect/" 
     }
 });
 const rooms = {}; 
