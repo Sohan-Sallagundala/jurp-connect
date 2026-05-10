@@ -1,6 +1,9 @@
+const PORT = process.env.PORT || 8000;
+
+
 const io = require('socket.io')(PORT, {
     cors: {
-        origin: ["https://sohan-sallagundala.github.io", "https://sohan-sallagundala.github.io/bat-connect"],
+        origin: "*", 
         methods: ["GET", "POST"]
     }
 });
