@@ -1,9 +1,10 @@
 const PORT = process.env.PORT || 8000; 
 const io = require('socket.io')(PORT, {
-    maxHttpBufferSize: 1e8,
-    cors: { origin: "*" } 
+    cors: {
+        origin: "https://sohan-sallagundala.github.io/bat-connect/",
+        methods: ["GET", "POST"]
+    }
 });
-
 const rooms = {}; 
 
 io.on('connection', socket => {
