@@ -1,6 +1,7 @@
-const io = require('socket.io')(8000, {
-    maxHttpBufferSize: 1e10,
-    cors: { origin: "*" }
+const PORT = process.env.PORT || 8000; 
+const io = require('socket.io')(PORT, {
+    maxHttpBufferSize: 1e8,
+    cors: { origin: "*" } 
 });
 
 const rooms = {}; 
