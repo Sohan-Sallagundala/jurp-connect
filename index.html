@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bat connect</title>
+    <title>Bat Connect | Encrypted Channel</title>
+    
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script defer src="js/client.js"></script>
+
+    <script src="https://bat-connect-backend.onrender.com/socket.io/socket.io.js"></script>
 </head>
 <body>
+
     <div id="login-screen">
         <div class="login-box">
             <h2>Access Channel</h2>
-            <input type="text" id="groupName" placeholder="Group Name (Room)">
-            <input type="text" id="username" placeholder="Your Name">
-            <input type="password" id="password" placeholder="Channel Key">
+            <input type="text" id="groupName" placeholder="Group Name (Room)" required>
+            <input type="text" id="username" placeholder="Your Name" required>
+            <input type="password" id="password" placeholder="Channel Key" required>
             <button onclick="login()">Initialize Connection</button>
         </div>
     </div>
@@ -23,15 +25,20 @@
         <h1>Encrypted_Channel_v2</h1>
     </nav>
 
-    <div class="container"></div>
+    <div class="container" id="message-container">
+        </div>
 
     <div class="send">
         <form action="#" id="send-container">
-            <label for="fileInp" id="file-label">📎</label>
-            <input type="file" id="fileInp" style="display:none;">
-            <input type="text" name="messageInp" id="messageInp" placeholder="Send message...">
+            <label for="fileInp" id="file-label" title="Attach Intel">📎</label>
+            <input type="file" id="fileInp" accept="image/*" style="display:none;">
+            
+            <input type="text" name="messageInp" id="messageInp" placeholder="Send transmission..." autocomplete="off">
             <button class="btn" type="submit">Send</button>
         </form>
     </div>
+
+    <script src="js/client.js"></script>
+
 </body>
 </html>
