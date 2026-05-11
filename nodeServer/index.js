@@ -2,7 +2,10 @@ const PORT = process.env.PORT || 8000;
 const io = require('socket.io')(PORT, {
     maxHttpBufferSize: 1e10,
     cors: {
-        origin: ["https://sohan-sallagundala.github.io/bat-connect"],
+        origin: [
+            "https://sohan-sallagundala.github.io",
+            "https://sohan-sallagundala.github.io/bat-connect"
+        ],
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -18,7 +21,7 @@ io.on('connection', socket => {
         }
 
         if (rooms[groupName] === password) {
-            socket.join(groupName);      
+            socket.join(groupName);
             socket.roomName = groupName;
             socket.userName = userName;
 
@@ -29,12 +32,13 @@ io.on('connection', socket => {
         }
     });
 
-    
     socket.on('send', (data) => {
-        socket.to(socket.roomName).emit('receive', {
-            message: data.message,
-            name: socket.userName
-        });
+        if (socket.roomName) {
+            socket.to(socket.roomName).emit('receive', {
+                message: data.message,
+                name: socket.userName
+            });
+        }
     });
 
     socket.on('send-file', (fileData) => {
@@ -55,7 +59,6 @@ io.on('connection', socket => {
                 name: 'SYSTEM'
             });
 
-            
             setTimeout(() => {
                 const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
                 if (!clientsInRoom || clientsInRoom.size === 0) {
@@ -64,4 +67,5 @@ io.on('connection', socket => {
             }, 0);
         }
     });
+
 });
