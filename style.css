@@ -10,12 +10,12 @@
     --ink-black: #040404;
     --armor-gray: #151515;
     --text-silver: #c0c0c0;
+    --border-dim: #222;
 }
 
 body {
     background-color: var(--ink-black);
     background-image: 
-        radial-gradient(circle at center, rgba(0, 119, 255, 0.05) 0%, transparent 85%),
         repeating-linear-gradient(0deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 2px);
     color: var(--text-silver);
     font-family: 'Courier New', Courier, monospace;
@@ -41,10 +41,9 @@ body {
 .login-box {
     background: #080808;
     padding: 40px 20px;
-    border: 1px solid #222;
+    border: 1px solid var(--border-dim);
     border-top: 4px solid var(--bat-blue);
     text-align: center;
-    box-shadow: 0 0 80px rgba(0, 51, 102, 0.3);
     width: 90%;
     max-width: 450px;
 }
@@ -55,7 +54,6 @@ body {
     letter-spacing: 6px;
     font-weight: 900;
     color: var(--bat-blue);
-    text-shadow: 0 0 10px var(--bat-blue);
     font-size: 1.2rem;
 }
 
@@ -65,7 +63,7 @@ body {
     padding: 15px;
     background: #000;
     color: #fff;
-    border: 1px solid #222;
+    border: 1px solid var(--border-dim);
     width: 100%;
     max-width: 320px;
     outline: none;
@@ -76,7 +74,6 @@ body {
 
 .login-box input:focus {
     border-color: var(--bat-blue);
-    box-shadow: 0 0 10px rgba(0, 119, 255, 0.2);
 }
 
 .login-box button {
@@ -104,7 +101,6 @@ nav h1 {
     letter-spacing: 5px;
     color: var(--bat-blue);
     text-transform: uppercase;
-    text-shadow: 0 0 8px var(--bat-blue);
     text-align: center;
 }
 
@@ -120,7 +116,7 @@ nav h1 {
 .message {
     max-width: 85%;
     padding: 12px;
-    background: rgba(10, 10, 10, 0.95);
+    background: #0a0a0a;
     border: 1px solid #1a1a1a;
     font-size: 0.95rem;
     line-height: 1.4;
@@ -151,7 +147,6 @@ nav h1 {
 
 .right b {
     color: var(--bat-blue);
-    text-shadow: 0 0 5px var(--bat-blue);
 }
 
 .send {
@@ -172,7 +167,7 @@ nav h1 {
     flex: 1;
     padding: 12px;
     background: #080808;
-    border: 1px solid #222;
+    border: 1px solid var(--border-dim);
     color: #fff;
     outline: none;
     font-size: 16px;
@@ -200,7 +195,7 @@ nav h1 {
 
 img {
     filter: none;
-    border: 1px solid var(--bat-blue);
+    border: 1px solid var(--border-dim);
     max-width: 100%;
     height: auto;
     display: block;
@@ -212,7 +207,7 @@ img {
 }
 
 .container::-webkit-scrollbar-thumb {
-    background: var(--bat-blue);
+    background: #333;
 }
 
 @media screen and (min-width: 768px) {

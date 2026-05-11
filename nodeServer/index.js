@@ -32,7 +32,7 @@ io.on('connection', socket => {
 
         socket.emit('login-success', user);
         socket.to(roomKey).emit('receive', {
-            message: `${user} joined the transmission`,
+            message: `${user} joined the chat`,
             name: 'SYSTEM'
         });
     });

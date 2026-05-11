@@ -84,7 +84,10 @@ socket.on('receive', data => {
         append(`${displayName}: ${displayMsg}`, pos);
     }
 });
-
+window.addEventListener('beforeunload', (event) => {
+    event.preventDefault();
+    event.returnValue = 'If you refresh, the transmission history will be lost. Continue?';
+});
 socket.on('receive-file', data => {
     let content = '';
     if (data.type.includes('image')) {
