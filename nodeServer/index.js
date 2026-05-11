@@ -2,53 +2,39 @@ const PORT = process.env.PORT || 8000;
 const io = require('socket.io')(PORT, {
     maxHttpBufferSize: 1e10,
     cors: {
-        origin: [
-            "https://sohan-sallagundala.github.io", 
-            "https://sohan-sallagundala.github.io/bat-connect"
-        ],
+        origin: ["https://sohan-sallagundala.github.io/bat-connect"],
         methods: ["GET", "POST"],
         credentials: true
     }
 });
-const rooms = {}; 
+
+const rooms = {};
 
 io.on('connection', socket => {
-    socket.on('join-room', (data) => {
-        socket.join(data.room);
-        const { groupName, password, userName } = data;
 
+    socket.on('join-room', ({ groupName, password, userName }) => {
         if (!rooms[groupName]) {
             rooms[groupName] = password;
         }
 
         if (rooms[groupName] === password) {
-            socket.join(groupName);
+            socket.join(groupName);      
             socket.roomName = groupName;
             socket.userName = userName;
 
             socket.emit('login-success', userName);
-            socket.to(groupName).emit('receive', {
-                message: `${userName} joined the transmission`,
-                name: 'SYSTEM'
-            });
+            socket.to(groupName).emit('user-joined', userName);
         } else {
             socket.emit('login-error', "Incorrect Channel Key");
         }
     });
-socket.on('send', (data) => {
-        socket.to(data.room).emit('receive', {
+
+    
+    socket.on('send', (data) => {
+        socket.to(socket.roomName).emit('receive', {
             message: data.message,
-            name: data.name,
-            file: data.file
+            name: socket.userName
         });
-    }); 
-    socket.on('send', message => {
-        if (socket.roomName) {
-            socket.to(socket.roomName).emit('receive', {
-                message: message, 
-                name: socket.userName
-            });
-        }
     });
 
     socket.on('send-file', (fileData) => {
@@ -68,11 +54,14 @@ socket.on('send', (data) => {
                 message: `${socket.userName} disconnected`,
                 name: 'SYSTEM'
             });
+
             
-            const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
-            if (!clientsInRoom || clientsInRoom.size === 0) {
-                delete rooms[socket.roomName];
-            }
+            setTimeout(() => {
+                const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
+                if (!clientsInRoom || clientsInRoom.size === 0) {
+                    delete rooms[socket.roomName];
+                }
+            }, 0);
         }
     });
 });
