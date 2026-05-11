@@ -1,5 +1,12 @@
+const http = require('http');
 const PORT = process.env.PORT || 8000;
-const io = require('socket.io')(PORT, {
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('bat-connect server is running');
+});
+
+const io = require('socket.io')(server, {
     maxHttpBufferSize: 1e10,
     cors: {
         origin: [
@@ -10,6 +17,12 @@ const io = require('socket.io')(PORT, {
         credentials: true
     }
 });
+
+server.listen(PORT);
+
+setInterval(() => {
+    http.get('https://bat-connect.onrender.com');
+}, 4 * 60 * 1000);
 
 io.on('connection', socket => {
     socket.on('join-room', (data) => {
