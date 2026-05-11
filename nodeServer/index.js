@@ -8,33 +8,31 @@ const server = http.createServer((req, res) => {
 });
 
 const io = require('socket.io')(server, {
-    maxHttpBufferSize: 1e10,
+    maxHttpBufferSize: 1e8,
     cors: {
         origin: "*",
-        methods: ["GET", "POST"],
-        credentials: true
+        methods: ["GET", "POST"]
     }
 });
 
-server.listen(PORT);
-
 setInterval(() => {
-    https.get('https://bat-connect.onrender.com', (res) => {
-    }).on('error', (e) => {});
+    https.get('https://bat-connect.onrender.com', (res) => {}).on('error', (e) => {});
 }, 4 * 60 * 1000);
 
 io.on('connection', socket => {
     socket.on('join-room', (data) => {
-        const { groupName, password, userName } = data;
-        const roomKey = `${groupName}__${password}`;
+        const group = data.groupName.trim().toLowerCase();
+        const pass = data.password.trim();
+        const user = data.userName.trim();
+        const roomKey = `${group}_#_${pass}`;
 
         socket.join(roomKey);
         socket.roomName = roomKey;
-        socket.userName = userName;
+        socket.userName = user;
 
-        socket.emit('login-success', userName);
+        socket.emit('login-success', user);
         socket.to(roomKey).emit('receive', {
-            message: `${userName} joined the transmission`,
+            message: `${user} joined the transmission`,
             name: 'SYSTEM'
         });
     });
@@ -68,3 +66,5 @@ io.on('connection', socket => {
         }
     });
 });
+
+server.listen(PORT);
