@@ -76,7 +76,7 @@ fileInp.addEventListener('change', (e) => {
 socket.on('receive', data => {
     let displayName, displayMsg;
     if (typeof data === 'object' && data !== null) {
-        displayName = data.name || "Anonymous";
+        displayName = data.name || "SYSTEM";
         displayMsg = data.message || "";
     } else {
         displayName = "Remote User";
