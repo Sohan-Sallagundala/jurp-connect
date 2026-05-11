@@ -1,4 +1,5 @@
 const http = require('http');
+const https = require('https');
 const PORT = process.env.PORT || 8000;
 
 const server = http.createServer((req, res) => {
@@ -9,10 +10,7 @@ const server = http.createServer((req, res) => {
 const io = require('socket.io')(server, {
     maxHttpBufferSize: 1e10,
     cors: {
-        origin: [
-            "https://sohan-sallagundala.github.io", 
-            "https://sohan-sallagundala.github.io/bat-connect"
-        ],
+        origin: "*",
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -21,7 +19,8 @@ const io = require('socket.io')(server, {
 server.listen(PORT);
 
 setInterval(() => {
-    http.get('https://bat-connect.onrender.com');
+    https.get('https://bat-connect.onrender.com', (res) => {
+    }).on('error', (e) => {});
 }, 4 * 60 * 1000);
 
 io.on('connection', socket => {
