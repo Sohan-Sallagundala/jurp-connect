@@ -1,101 +1,105 @@
 const socket = io('https://bat-connect.onrender.com');
 
 const form = document.getElementById('send-container');
-const messageInp = document.getElementById('messageInp');
-const messageContainer = document.querySelector(".container");
+const messageInput = document.getElementById('messageInp');
+const messageContainer = document.querySelector('.container');
+const fileInp = document.getElementById('fileInp');
+const audio = new Audio('ting.mp3');
+
+function login() {
+    const group = document.getElementById('groupName').value;
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    
+    if(group && user && pass) {
+        socket.emit('join-room', { groupName: group, userName: user, password: pass });
+    } else {
+        alert("Please fill all fields");
+    }
+}
+
+socket.on('login-success', (userName) => {
+    document.getElementById('login-screen').style.display = 'none';
+    document.querySelector('nav h1').innerText = "Active Channel: " + document.getElementById('groupName').value;
+});
+
+socket.on('login-error', (msg) => {
+    alert(msg);
+});
 
 const append = (message, position) => {
     const messageElement = document.createElement('div');
+    messageElement.innerHTML = message;
     messageElement.classList.add('message', position);
-    
-    const nameSpan = document.createElement('b');
-    const msgText = document.createElement('span');
-    
-    if (message.includes(': ')) {
-        const parts = message.split(': ');
-        nameSpan.innerText = parts[0];
-        msgText.innerText = parts.slice(1).join(': ');
-    } else {
-        msgText.innerText = message;
-    }
-
-    messageElement.append(nameSpan, msgText);
     messageContainer.append(messageElement);
-    messageContainer.scrollTop = messageContainer.scrollHeight;
-};
-
-const login = () => {
-    const groupName = document.getElementById('groupName').value;
-    const userName = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    if (groupName && userName && password) {
-        socket.emit('join-room', { groupName, password, userName });
-    } else {
-        alert("Enter all credentials, Detective.");
+    if (position == 'left') {
+        audio.play().catch(e => console.log("Audio play blocked"));
     }
-};
-
-socket.on('login-success', (name) => {
-    document.getElementById('login-screen').style.display = 'none';
-    append(`SYSTEM: Welcome to the channel, ${name}`, 'center');
-});
-
-socket.on('login-error', (msg) => alert(msg));
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+}
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const message = messageInp.value;
-    const groupName = document.getElementById('groupName').value;
-    const userName = document.getElementById('username').value;
+    
+    const message = messageInput.value;
+    const room = document.getElementById('groupName').value;
+    const name = document.getElementById('username').value;
 
     if (message) {
-        append(`YOU: ${message}`, 'right');
-        socket.emit('send', { message, name: userName, room: groupName });
-        messageInp.value = '';
+        append(`You: ${message}`, 'right');
+
+        
+        socket.emit('send', { 
+            message: message, 
+            name: name, 
+            room: room 
+        });
+
+        messageInput.value = '';
     }
 });
 
-socket.on('receive', data => {
-    append(`${data.name}: ${data.message}`, 'left');
-});
-
-socket.on('user-joined', name => {
-    append(`SYSTEM: ${name} joined the transmission`, 'center');
-});
-
-document.getElementById('fileInp').addEventListener('change', (e) => {
+fileInp.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
     const reader = new FileReader();
     reader.onload = () => {
-        socket.emit('send-file', { name: file.name, type: file.type, body: reader.result });
-        append(`YOU: sent a file`, 'right');
+        const fileData = { name: file.name, type: file.type, body: reader.result };
+        append(`You sent: ${file.name}`, 'right');
+        socket.emit('send-file', fileData);
     };
     reader.readAsDataURL(file);
 });
 
-socket.on('receive-file', data => {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message', 'left');
-    
-    const nameLabel = document.createElement('b');
-    nameLabel.innerText = `${data.userName} shared a file:`;
-    
-    if (data.type && data.type.includes('image')) {
-        const img = document.createElement('img');
-        img.src = data.body;
-        img.style.cssText = "display:block; max-width:250px; margin-top:5px;";
-        messageElement.append(nameLabel, img);
+socket.on('receive', data => {
+    let displayName, displayMsg;
+
+    if (typeof data === 'object' && data !== null) {
+        displayName = data.name || "Anonymous";
+        displayMsg = data.message || "";
     } else {
-        const link = document.createElement('a');
-        link.href = data.body;
-        link.download = data.name;
-        link.innerText = `Download ${data.name}`;
-        link.style.cssText = "display:block; margin-top:5px;";
-        messageElement.append(nameLabel, link);
+        displayName = "Remote User";
+        displayMsg = data;
     }
 
-    messageContainer.append(messageElement);
-    messageContainer.scrollTop = messageContainer.scrollHeight;
+    if (displayMsg) {
+        append(`${displayName}: ${displayMsg}`, 'left');
+    }
 });
+
+socket.on('receive-file', data => {
+    let content = '';
+    if (data.type.includes('image')) {
+        content = `<img src="${data.body}" style="max-width:250px; display:block; margin-bottom:5px;">`;
+    }
+    const link = `<a href="${data.body}" download="${data.name}">Download ${data.name}</a>`;
+    append(`<b>${data.userName}:</b><br>${content}${link}`, 'left');
+});
+
+
+socket.on('user-joined', name => {
+    
+    append(`${name} joined the channel`, 'center'); 
+    
+}); 

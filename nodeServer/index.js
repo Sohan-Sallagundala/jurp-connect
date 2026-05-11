@@ -1,21 +1,20 @@
-const PORT = process.env.PORT || 8000;
+ const PORT = process.env.PORT || 8000;
 const io = require('socket.io')(PORT, {
     maxHttpBufferSize: 1e10,
     cors: {
         origin: [
-            "https://sohan-sallagundala.github.io",
+            "https://sohan-sallagundala.github.io", 
             "https://sohan-sallagundala.github.io/bat-connect"
         ],
         methods: ["GET", "POST"],
         credentials: true
     }
 });
-
-const rooms = {};
+const rooms = {}; 
 
 io.on('connection', socket => {
-
     socket.on('join-room', (data) => {
+        socket.join(data.room);
         const { groupName, password, userName } = data;
 
         if (!rooms[groupName]) {
@@ -28,17 +27,28 @@ io.on('connection', socket => {
             socket.userName = userName;
 
             socket.emit('login-success', userName);
-            socket.to(groupName).emit('user-joined', userName);
+            socket.to(groupName).emit('receive', {
+                message: `${userName} joined the transmission`,
+                name: 'SYSTEM'
+            });
         } else {
             socket.emit('login-error', "Incorrect Channel Key");
         }
     });
-
-    socket.on('send', (data) => {
+socket.on('send', (data) => {
         socket.to(data.room).emit('receive', {
             message: data.message,
-            name: data.name
+            name: data.name,
+            file: data.file
         });
+    }); 
+    socket.on('send', message => {
+        if (socket.roomName) {
+            socket.to(socket.roomName).emit('receive', {
+                message: message, 
+                name: socket.userName
+            });
+        }
     });
 
     socket.on('send-file', (fileData) => {
@@ -58,14 +68,11 @@ io.on('connection', socket => {
                 message: `${socket.userName} disconnected`,
                 name: 'SYSTEM'
             });
-
-            setTimeout(() => {
-                const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
-                if (!clientsInRoom || clientsInRoom.size === 0) {
-                    delete rooms[socket.roomName];
-                }
-            }, 0);
+            
+            const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
+            if (!clientsInRoom || clientsInRoom.size === 0) {
+                delete rooms[socket.roomName];
+            }
         }
     });
-
 });
