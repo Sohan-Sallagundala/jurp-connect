@@ -1,72 +1,82 @@
-const PORT = process.env.PORT || 8000;
-const io = require('socket.io')(PORT, {
-    maxHttpBufferSize: 1e10,
-    cors: {
-        origin: [
-            "https://sohan-sallagundala.github.io", 
-            "https://sohan-sallagundala.github.io/bat-connect"
-        ],
-        methods: ["GET", "POST"],
-        credentials: true
+const socket = io('https://bat-connect-backend.onrender.com');
+
+const form = document.getElementById('send-container');
+const messageInp = document.getElementById('messageInp');
+const messageContainer = document.querySelector(".container");
+
+const append = (message, position) => {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message', position);
+    
+    const nameSpan = document.createElement('b');
+    const msgText = document.createElement('span');
+    
+    if (message.includes(': ')) {
+        const parts = message.split(': ');
+        nameSpan.innerText = parts[0];
+        msgText.innerText = parts[1];
+    } else {
+        msgText.innerText = message;
+    }
+
+    messageElement.append(nameSpan, msgText);
+    messageContainer.append(messageElement);
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+};
+
+const login = () => {
+    const groupName = document.getElementById('groupName').value;
+    const userName = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (groupName && userName && password) {
+        socket.emit('join-room', { groupName, password, userName });
+    } else {
+        alert("Enter all credentials, Detective.");
+    }
+};
+
+socket.on('login-success', (name) => {
+    document.getElementById('login-screen').style.display = 'none';
+    append(`SYSTEM: Welcome to the channel, ${name}`, 'center');
+});
+
+socket.on('login-error', (msg) => alert(msg));
+
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const message = messageInp.value;
+    const groupName = document.getElementById('groupName').value;
+    const userName = document.getElementById('username').value;
+
+    if (message) {
+        append(`YOU: ${message}`, 'right');
+        socket.emit('send', { message, name: userName, room: groupName });
+        messageInp.value = '';
     }
 });
 
-const rooms = {}; 
+socket.on('receive', data => {
+    append(`${data.name}: ${data.message}`, 'left');
+});
 
-io.on('connection', socket => {
-    socket.on('join-room', (data) => {
-        const { groupName, password, userName } = data;
+socket.on('user-joined', name => {
+    append(`SYSTEM: ${name} joined the transmission`, 'center');
+});
 
-        if (!rooms[groupName]) {
-            rooms[groupName] = password;
-        }
-
-        if (rooms[groupName] === password) {
-            socket.join(groupName);
-            socket.roomName = groupName;
-            socket.userName = userName;
-
-            socket.emit('login-success', userName);
-            socket.to(groupName).emit('user-joined', userName);
-            socket.to(groupName).emit('receive', {
-                message: `${userName} joined the transmission`,
-                name: 'SYSTEM'
-            });
-        } else {
-            socket.emit('login-error', "Incorrect Channel Key");
-        }
-    });
-
-    // ONLY ONE send handler — fixes [object Object] bug
-    socket.on('send', (data) => {
-        socket.to(data.room).emit('receive', {
-            message: data.message,
-            name: data.name
-        });
-    }); 
-
-    socket.on('send-file', (fileData) => {
-        if (socket.roomName) {
-            socket.to(socket.roomName).emit('receive-file', {
-                body: fileData.body,
-                name: fileData.name,
-                userName: socket.userName,
-                type: fileData.type
-            });
-        }
-    });
-
-    socket.on('disconnect', () => {
-        if (socket.roomName) {
-            socket.to(socket.roomName).emit('receive', {
-                message: `${socket.userName} disconnected`,
-                name: 'SYSTEM'
-            });
-            
-            const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
-            if (!clientsInRoom || clientsInRoom.size === 0) {
-                delete rooms[socket.roomName];
-            }
-        }
-    });
+// File Handling logic for your 'send-file' event
+socket.on('receive-file', data => {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message', 'left');
+    
+    const nameLabel = document.createElement('b');
+    nameLabel.innerText = `${data.userName} shared a file:`;
+    
+    const img = document.createElement('img');
+    img.src = data.body;
+    img.style.display = "block";
+    
+    messageElement.append(nameLabel, img);
+    messageContainer.append(messageElement);
+    messageContainer.scrollTop = messageContainer.scrollHeight;
 });
