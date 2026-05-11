@@ -3,7 +3,7 @@ const io = require('socket.io')(PORT, {
     maxHttpBufferSize: 1e10,
     cors: {
         origin: [
-            "https://sohan-sallagundala.github.io", 
+            "https://sohan-sallagundala.github.io",
             "https://sohan-sallagundala.github.io/bat-connect"
         ],
         methods: ["GET", "POST"],
@@ -11,9 +11,10 @@ const io = require('socket.io')(PORT, {
     }
 });
 
-const rooms = {}; 
+const rooms = {};
 
 io.on('connection', socket => {
+
     socket.on('join-room', (data) => {
         const { groupName, password, userName } = data;
 
@@ -28,22 +29,17 @@ io.on('connection', socket => {
 
             socket.emit('login-success', userName);
             socket.to(groupName).emit('user-joined', userName);
-            socket.to(groupName).emit('receive', {
-                message: `${userName} joined the transmission`,
-                name: 'SYSTEM'
-            });
         } else {
             socket.emit('login-error', "Incorrect Channel Key");
         }
     });
 
-    // ONLY ONE send handler — fixes [object Object] bug
     socket.on('send', (data) => {
         socket.to(data.room).emit('receive', {
             message: data.message,
             name: data.name
         });
-    }); 
+    });
 
     socket.on('send-file', (fileData) => {
         if (socket.roomName) {
@@ -62,11 +58,14 @@ io.on('connection', socket => {
                 message: `${socket.userName} disconnected`,
                 name: 'SYSTEM'
             });
-            
-            const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
-            if (!clientsInRoom || clientsInRoom.size === 0) {
-                delete rooms[socket.roomName];
-            }
+
+            setTimeout(() => {
+                const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
+                if (!clientsInRoom || clientsInRoom.size === 0) {
+                    delete rooms[socket.roomName];
+                }
+            }, 0);
         }
     });
+
 });

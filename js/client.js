@@ -14,7 +14,7 @@ const append = (message, position) => {
     if (message.includes(': ')) {
         const parts = message.split(': ');
         nameSpan.innerText = parts[0];
-        msgText.innerText = parts[1];
+        msgText.innerText = parts.slice(1).join(': ');
     } else {
         msgText.innerText = message;
     }
@@ -64,7 +64,17 @@ socket.on('user-joined', name => {
     append(`SYSTEM: ${name} joined the transmission`, 'center');
 });
 
-// File Handling logic for your 'send-file' event
+document.getElementById('fileInp').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        socket.emit('send-file', { name: file.name, type: file.type, body: reader.result });
+        append(`YOU: sent a file`, 'right');
+    };
+    reader.readAsDataURL(file);
+});
+
 socket.on('receive-file', data => {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message', 'left');
@@ -72,11 +82,20 @@ socket.on('receive-file', data => {
     const nameLabel = document.createElement('b');
     nameLabel.innerText = `${data.userName} shared a file:`;
     
-    const img = document.createElement('img');
-    img.src = data.body;
-    img.style.display = "block";
-    
-    messageElement.append(nameLabel, img);
+    if (data.type && data.type.includes('image')) {
+        const img = document.createElement('img');
+        img.src = data.body;
+        img.style.cssText = "display:block; max-width:250px; margin-top:5px;";
+        messageElement.append(nameLabel, img);
+    } else {
+        const link = document.createElement('a');
+        link.href = data.body;
+        link.download = data.name;
+        link.innerText = `Download ${data.name}`;
+        link.style.cssText = "display:block; margin-top:5px;";
+        messageElement.append(nameLabel, link);
+    }
+
     messageContainer.append(messageElement);
     messageContainer.scrollTop = messageContainer.scrollHeight;
 });
