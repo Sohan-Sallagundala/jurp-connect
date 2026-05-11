@@ -33,28 +33,24 @@ const append = (message, position) => {
     messageElement.classList.add('message', position);
     messageContainer.append(messageElement);
     if (position == 'left') {
-        audio.play().catch(e => console.log("Audio play blocked"));
+        audio.play().catch(e => {});
     }
     messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    
     const message = messageInput.value;
     const room = document.getElementById('groupName').value;
     const name = document.getElementById('username').value;
 
     if (message) {
         append(`You: ${message}`, 'right');
-
-        
         socket.emit('send', { 
             message: message, 
             name: name, 
             room: room 
         });
-
         messageInput.value = '';
     }
 });
@@ -74,7 +70,6 @@ fileInp.addEventListener('change', (e) => {
 
 socket.on('receive', data => {
     let displayName, displayMsg;
-
     if (typeof data === 'object' && data !== null) {
         displayName = data.name || "Anonymous";
         displayMsg = data.message || "";
@@ -82,9 +77,9 @@ socket.on('receive', data => {
         displayName = "Remote User";
         displayMsg = data;
     }
-
     if (displayMsg) {
-        append(`${displayName}: ${displayMsg}`, 'left');
+        let pos = displayName === 'SYSTEM' ? 'center' : 'left';
+        append(`${displayName}: ${displayMsg}`, pos);
     }
 });
 
@@ -96,10 +91,3 @@ socket.on('receive-file', data => {
     const link = `<a href="${data.body}" download="${data.name}">Download ${data.name}</a>`;
     append(`<b>${data.userName}:</b><br>${content}${link}`, 'left');
 });
-
-
-socket.on('user-joined', name => {
-    
-    append(`${name} joined the channel`, 'center'); 
-    
-}); 

@@ -1,4 +1,4 @@
- const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8000;
 const io = require('socket.io')(PORT, {
     maxHttpBufferSize: 1e10,
     cors: {
@@ -10,11 +10,11 @@ const io = require('socket.io')(PORT, {
         credentials: true
     }
 });
+
 const rooms = {}; 
 
 io.on('connection', socket => {
     socket.on('join-room', (data) => {
-        socket.join(data.room);
         const { groupName, password, userName } = data;
 
         if (!rooms[groupName]) {
@@ -35,17 +35,11 @@ io.on('connection', socket => {
             socket.emit('login-error', "Incorrect Channel Key");
         }
     });
-socket.on('send', (data) => {
-        socket.to(data.room).emit('receive', {
-            message: data.message,
-            name: data.name,
-            file: data.file
-        });
-    }); 
-    socket.on('send', message => {
+
+    socket.on('send', (data) => {
         if (socket.roomName) {
             socket.to(socket.roomName).emit('receive', {
-                message: message, 
+                message: data.message,
                 name: socket.userName
             });
         }
