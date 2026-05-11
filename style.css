@@ -199,10 +199,12 @@ nav h1 {
 }
 
 img {
-    filter: grayscale(1) contrast(1.1) brightness(0.9);
+    filter: none;
     border: 1px solid var(--bat-blue);
     max-width: 100%;
     height: auto;
+    display: block;
+    margin: 10px 0;
 }
 
 .container::-webkit-scrollbar {
