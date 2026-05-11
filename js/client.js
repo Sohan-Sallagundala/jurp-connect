@@ -73,8 +73,12 @@ fileInp.addEventListener('change', (e) => {
 });
 
 socket.on('receive', data => {
-    const formattedMessage = `${data.name}: ${data.message}`;
-    append(formattedMessage, 'left');
+    let name = data.name || "Unknown";
+    let message = typeof data === 'string' ? data : data.message;
+
+    if (message) {
+        append(`${name}: ${message}`, 'left');
+    }
 });
 
 socket.on('receive-file', data => {
