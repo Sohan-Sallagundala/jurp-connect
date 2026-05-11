@@ -7,13 +7,12 @@ const fileInp = document.getElementById('fileInp');
 const audio = new Audio('ting.mp3');
 
 function login() {
-    const group = document.getElementById('groupName').value;
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
+    const group = document.getElementById('groupName').value.trim();
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value.trim();
     
-    if(group && user && pass) {
+    if (group && user && pass) {
         socket.emit('join-room', { 
-            room: group, 
             groupName: group, 
             userName: user, 
             password: pass 
@@ -46,16 +45,10 @@ const append = (message, position) => {
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = messageInput.value;
-    const room = document.getElementById('groupName').value;
-    const name = document.getElementById('username').value;
 
     if (message) {
         append(`You: ${message}`, 'right');
-        socket.emit('send', { 
-            message: message, 
-            name: name, 
-            room: room 
-        });
+        socket.emit('send', { message: message });
         messageInput.value = '';
     }
 });

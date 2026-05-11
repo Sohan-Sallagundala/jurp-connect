@@ -11,29 +11,20 @@ const io = require('socket.io')(PORT, {
     }
 });
 
-const rooms = {}; 
-
 io.on('connection', socket => {
     socket.on('join-room', (data) => {
         const { groupName, password, userName } = data;
+        const roomKey = `${groupName}__${password}`;
 
-        if (!rooms[groupName]) {
-            rooms[groupName] = password;
-        }
+        socket.join(roomKey);
+        socket.roomName = roomKey;
+        socket.userName = userName;
 
-        if (rooms[groupName] === password) {
-            socket.join(groupName);
-            socket.roomName = groupName;
-            socket.userName = userName;
-
-            socket.emit('login-success', userName);
-            socket.to(groupName).emit('receive', {
-                message: `${userName} joined the transmission`,
-                name: 'SYSTEM'
-            });
-        } else {
-            socket.emit('login-error', "Incorrect Channel Key");
-        }
+        socket.emit('login-success', userName);
+        socket.to(roomKey).emit('receive', {
+            message: `${userName} joined the transmission`,
+            name: 'SYSTEM'
+        });
     });
 
     socket.on('send', (data) => {
@@ -62,11 +53,6 @@ io.on('connection', socket => {
                 message: `${socket.userName} disconnected`,
                 name: 'SYSTEM'
             });
-            
-            const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
-            if (!clientsInRoom || clientsInRoom.size === 0) {
-                delete rooms[socket.roomName];
-            }
         }
     });
 });
