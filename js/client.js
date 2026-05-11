@@ -40,21 +40,21 @@ const append = (message, position) => {
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const message = messageInput.value;
     
-    // You must grab these values to tell the server where to send the data
+    const message = messageInput.value;
     const room = document.getElementById('groupName').value;
     const name = document.getElementById('username').value;
 
     if (message) {
-        append(`You: ${message}`, 'right'); 
+        append(`You: ${message}`, 'right');
+
         
         socket.emit('send', { 
             message: message, 
-            room: room, 
-            name: name 
+            name: name, 
+            room: room 
         });
-        
+
         messageInput.value = '';
     }
 });
