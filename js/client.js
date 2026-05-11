@@ -73,11 +73,18 @@ fileInp.addEventListener('change', (e) => {
 });
 
 socket.on('receive', data => {
-    let name = data.name || "Unknown";
-    let message = typeof data === 'string' ? data : data.message;
+    let displayName, displayMsg;
 
-    if (message) {
-        append(`${name}: ${message}`, 'left');
+    if (typeof data === 'object' && data !== null) {
+        displayName = data.name || "Anonymous";
+        displayMsg = data.message || "";
+    } else {
+        displayName = "Remote User";
+        displayMsg = data;
+    }
+
+    if (displayMsg) {
+        append(`${displayName}: ${displayMsg}`, 'left');
     }
 });
 
