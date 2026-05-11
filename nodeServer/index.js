@@ -10,6 +10,7 @@ const rooms = {};
 
 io.on('connection', socket => {
     socket.on('join-room', (data) => {
+        socket.join(data.room);
         const { groupName, password, userName } = data;
 
         if (!rooms[groupName]) {
@@ -30,7 +31,13 @@ io.on('connection', socket => {
             socket.emit('login-error', "Incorrect Channel Key");
         }
     });
-
+socket.on('send', (data) => {
+        socket.to(data.room).emit('receive', {
+            message: data.message,
+            name: data.name,
+            file: data.file
+        });
+    }); 
     socket.on('send', message => {
         if (socket.roomName) {
             socket.to(socket.roomName).emit('receive', {
