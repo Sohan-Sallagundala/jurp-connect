@@ -2,8 +2,12 @@ const PORT = process.env.PORT || 8000;
 const io = require('socket.io')(PORT, {
     maxHttpBufferSize: 1e10,
     cors: {
-        origin: "*", 
-        methods: ["GET", "POST"]
+        origin: [
+            "https://sohan-sallagundala.github.io", 
+            "https://sohan-sallagundala.github.io/bat-connect"
+        ],
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 const rooms = {}; 
