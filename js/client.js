@@ -84,3 +84,10 @@ socket.on('receive-file', data => {
     const link = `<a href="${data.body}" download="${data.name}">Download ${data.name}</a>`;
     append(`<b>${data.userName}:</b><br>${content}${link}`, 'left');
 });
+
+
+socket.on('user-joined', name => {
+    
+    append(`${name} joined the channel`, 'center'); 
+    
+});
