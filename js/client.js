@@ -1,4 +1,4 @@
-const socket = io('https://bat-connect-backend.onrender.com');
+const socket = io('https://bat-connect.onrender.com');
 
 const form = document.getElementById('send-container');
 const messageInp = document.getElementById('messageInp');
