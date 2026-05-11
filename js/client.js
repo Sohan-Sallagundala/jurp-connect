@@ -12,7 +12,12 @@ function login() {
     const pass = document.getElementById('password').value;
     
     if(group && user && pass) {
-        socket.emit('join-room', { groupName: group, userName: user, password: pass });
+        socket.emit('join-room', { 
+            room: group, 
+            groupName: group, 
+            userName: user, 
+            password: pass 
+        });
     } else {
         alert("Please fill all fields");
     }
