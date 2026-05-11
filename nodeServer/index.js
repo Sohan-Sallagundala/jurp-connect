@@ -1,7 +1,6 @@
 const PORT = process.env.PORT || 8000;
-
-
 const io = require('socket.io')(PORT, {
+    maxHttpBufferSize: 1e10,
     cors: {
         origin: "*", 
         methods: ["GET", "POST"]
