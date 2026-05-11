@@ -1,105 +1,72 @@
-const socket = io('https://bat-connect.onrender.com');
-
-const form = document.getElementById('send-container');
-const messageInput = document.getElementById('messageInp');
-const messageContainer = document.querySelector('.container');
-const fileInp = document.getElementById('fileInp');
-const audio = new Audio('ting.mp3');
-
-function login() {
-    const group = document.getElementById('groupName').value;
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
-    
-    if(group && user && pass) {
-        socket.emit('join-room', { groupName: group, userName: user, password: pass });
-    } else {
-        alert("Please fill all fields");
+const PORT = process.env.PORT || 8000;
+const io = require('socket.io')(PORT, {
+    maxHttpBufferSize: 1e10,
+    cors: {
+        origin: [
+            "https://sohan-sallagundala.github.io", 
+            "https://sohan-sallagundala.github.io/bat-connect"
+        ],
+        methods: ["GET", "POST"],
+        credentials: true
     }
-}
-
-socket.on('login-success', (userName) => {
-    document.getElementById('login-screen').style.display = 'none';
-    document.querySelector('nav h1').innerText = "Active Channel: " + document.getElementById('groupName').value;
 });
 
-socket.on('login-error', (msg) => {
-    alert(msg);
-});
+const rooms = {}; 
 
-const append = (message, position) => {
-    const messageElement = document.createElement('div');
-    messageElement.innerHTML = message;
-    messageElement.classList.add('message', position);
-    messageContainer.append(messageElement);
-    if (position == 'left') {
-        audio.play().catch(e => console.log("Audio play blocked"));
-    }
-    messageContainer.scrollTop = messageContainer.scrollHeight;
-}
+io.on('connection', socket => {
+    socket.on('join-room', (data) => {
+        const { groupName, password, userName } = data;
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const message = messageInput.value;
-    const room = document.getElementById('groupName').value;
-    const name = document.getElementById('username').value;
+        if (!rooms[groupName]) {
+            rooms[groupName] = password;
+        }
 
-    if (message) {
-        append(`You: ${message}`, 'right');
+        if (rooms[groupName] === password) {
+            socket.join(groupName);
+            socket.roomName = groupName;
+            socket.userName = userName;
 
-        
-        socket.emit('send', { 
-            message: message, 
-            name: name, 
-            room: room 
+            socket.emit('login-success', userName);
+            socket.to(groupName).emit('user-joined', userName);
+            socket.to(groupName).emit('receive', {
+                message: `${userName} joined the transmission`,
+                name: 'SYSTEM'
+            });
+        } else {
+            socket.emit('login-error', "Incorrect Channel Key");
+        }
+    });
+
+    // ONLY ONE send handler — fixes [object Object] bug
+    socket.on('send', (data) => {
+        socket.to(data.room).emit('receive', {
+            message: data.message,
+            name: data.name
         });
+    }); 
 
-        messageInput.value = '';
-    }
-});
+    socket.on('send-file', (fileData) => {
+        if (socket.roomName) {
+            socket.to(socket.roomName).emit('receive-file', {
+                body: fileData.body,
+                name: fileData.name,
+                userName: socket.userName,
+                type: fileData.type
+            });
+        }
+    });
 
-fileInp.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-        const fileData = { name: file.name, type: file.type, body: reader.result };
-        append(`You sent: ${file.name}`, 'right');
-        socket.emit('send-file', fileData);
-    };
-    reader.readAsDataURL(file);
-});
-
-socket.on('receive', data => {
-    let displayName, displayMsg;
-
-    if (typeof data === 'object' && data !== null) {
-        displayName = data.name || "Anonymous";
-        displayMsg = data.message || "";
-    } else {
-        displayName = "Remote User";
-        displayMsg = data;
-    }
-
-    if (displayMsg) {
-        append(`${displayName}: ${displayMsg}`, 'left');
-    }
-});
-
-socket.on('receive-file', data => {
-    let content = '';
-    if (data.type.includes('image')) {
-        content = `<img src="${data.body}" style="max-width:250px; display:block; margin-bottom:5px;">`;
-    }
-    const link = `<a href="${data.body}" download="${data.name}">Download ${data.name}</a>`;
-    append(`<b>${data.userName}:</b><br>${content}${link}`, 'left');
-});
-
-
-socket.on('user-joined', name => {
-    
-    append(`${name} joined the channel`, 'center'); 
-    
+    socket.on('disconnect', () => {
+        if (socket.roomName) {
+            socket.to(socket.roomName).emit('receive', {
+                message: `${socket.userName} disconnected`,
+                name: 'SYSTEM'
+            });
+            
+            const clientsInRoom = io.sockets.adapter.rooms.get(socket.roomName);
+            if (!clientsInRoom || clientsInRoom.size === 0) {
+                delete rooms[socket.roomName];
+            }
+        }
+    });
 });
