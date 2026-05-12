@@ -81,13 +81,15 @@ socket.on('receive', data => {
     }
     if (displayMsg) {
         let pos = displayName === 'SYSTEM' ? 'center' : 'left';
-        append(`${displayName}: ${displayMsg}`, pos);
+        append(displayName === 'SYSTEM' ? displayMsg : `${displayName}: ${displayMsg}`, pos);
     }
 });
+
 window.addEventListener('beforeunload', (event) => {
     event.preventDefault();
     event.returnValue = 'If you refresh, the transmission history will be lost. Continue?';
 });
+
 socket.on('receive-file', data => {
     let content = '';
     if (data.type.includes('image')) {

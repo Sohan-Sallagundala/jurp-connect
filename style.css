@@ -11,6 +11,7 @@
     --armor-gray: #151515;
     --text-silver: #c0c0c0;
     --border-dim: #222;
+    --system-green: #00cc66;
 }
 
 body {
@@ -36,6 +37,49 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    overflow-y: auto;
+}
+
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 90%;
+    max-width: 450px;
+    padding: 30px 0;
+}
+
+.manual-box {
+    background: #080808;
+    border: 1px solid var(--border-dim);
+    border-left: 3px solid var(--system-green);
+    padding: 20px;
+    width: 100%;
+    max-width: 450px;
+}
+
+.manual-title {
+    color: var(--system-green);
+    font-size: 0.6rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+.manual-box ol {
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.manual-box ol li {
+    font-size: 0.78rem;
+    color: #888;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
 }
 
 .login-box {
@@ -44,17 +88,25 @@ body {
     border: 1px solid var(--border-dim);
     border-top: 4px solid var(--bat-blue);
     text-align: center;
-    width: 90%;
+    width: 100%;
     max-width: 450px;
 }
 
 .login-box h2 {
-    margin-bottom: 30px;
+    margin-bottom: 4px;
     text-transform: uppercase;
-    letter-spacing: 6px;
+    letter-spacing: 12px;
     font-weight: 900;
     color: var(--bat-blue);
-    font-size: 1.2rem;
+    font-size: 2rem;
+}
+
+.login-subtext {
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    color: #ffffff;
+    text-transform: uppercase;
+    margin-bottom: 28px;
 }
 
 .login-box input {
@@ -91,9 +143,13 @@ body {
 }
 
 nav {
-    padding: 15px;
+    padding: 10px 15px;
     border-bottom: 1px solid #1a1a1a;
     background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
 }
 
 nav h1 {
@@ -102,6 +158,17 @@ nav h1 {
     color: var(--bat-blue);
     text-transform: uppercase;
     text-align: center;
+}
+
+.nav-note {
+    font-size: 0.58rem;
+    color: #aaa;
+    letter-spacing: 1px;
+    text-align: center;
+    border: 1px solid #1a1a1a;
+    padding: 5px 12px;
+    background: #060606;
+    line-height: 1.4;
 }
 
 .container {
@@ -147,6 +214,19 @@ nav h1 {
 
 .right b {
     color: var(--bat-blue);
+}
+
+.center {
+    align-self: center;
+    background: transparent;
+    border: 1px solid var(--system-green);
+    color: var(--system-green);
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 6px 14px;
+    max-width: 90%;
 }
 
 .send {
@@ -211,9 +291,16 @@ img {
 }
 
 @media screen and (min-width: 768px) {
-    nav h1 { font-size: 0.75rem; letter-spacing: 10px; text-align: left; padding-left: 25px; }
+    nav {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 25px;
+    }
+    nav h1 { font-size: 0.75rem; letter-spacing: 10px; text-align: left; }
+    .nav-note { font-size: 0.6rem; }
     .message { max-width: 70%; padding: 18px; font-size: 1.1rem; }
-    .login-box h2 { font-size: 1.5rem; letter-spacing: 12px; }
+    .login-box h2 { font-size: 2.5rem; letter-spacing: 16px; }
     .send { padding: 30px; }
     #messageInp { margin: 0 20px; }
     .btn { padding: 12px 30px; font-size: 1rem; }
