@@ -1,7 +1,7 @@
 # Bat-Connect (branch: main)
 
 A terminal-style real-time chat application inspired by the Dark Knight's technology.
-Live site: https://sohan-sallagundala.github.io/bat-connect/
+Live site: https://jurp-connect.vercel.app/
 Backend: https://bat-connect-backend.onrender.com
 
 ## Stack
