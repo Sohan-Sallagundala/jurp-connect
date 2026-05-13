@@ -1,4 +1,4 @@
-# Jurp-connect (branch: main)
+# jurp-connect (branch: main)
 
 A terminal-style real-time chat application inspired by the Dark Knight's technology.
 Live site: https://jurp-connect.vercel.app/
